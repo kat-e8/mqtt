@@ -1,0 +1,65 @@
+services:
+  edge:
+    image: inductiveautomation/ignition:8.1.45
+    hostname: edge
+    ports:
+      - 9088:8088
+    volumes:
+      - edge-data:/usr/local/bin/ignition/data
+      - ./gw-init/edge.gwbk:/restore.gwbk
+      - ./gw-init/edge-uuid.txt:/usr/local/bin/ignition/data/.uuid
+      - ./gw-init/edge-metro-keystore:/usr/local/bin/ignition/data/local/metro-keystore
+    networks:
+      - edge-network
+    environment:
+      - IGNITION_EDITION=edge
+      - GATEWAY_ADMIN_PASSWORD=katlego
+      - ACCEPT_IGNITION_EULA=Y
+    command: >
+      -n edge-gateway
+      -m 2048
+      -r /restore.gwbk
+  central:
+    image: inductiveautomation/ignition:8.1.45
+    hostname: central
+    ports:
+      - 9090:8088
+    volumes:
+      - central-data:/usr/local/bin/ignition/data
+      - ./gw-init/central.gwbk:/restore.gwbk
+      - ./gw-init/central-uuid.txt:/usr/local/bin/ignition/data/.uuid
+      - ./gw-init/central-metro-keystore:/usr/local/bin/ignition/data/local/metro-keystore
+    networks:
+      - central-network
+      - edge-network
+    environment:
+      - IGNITION_EDITION=standard
+      - GATEWAY_ADMIN_PASSWORD=gagoopane
+      - ACCEPT_IGNITION_EULA=Y
+    command: >
+      -n central-gateway
+      -m 2048
+      -r /restore.gwbk
+  db:
+    image: mariadb:10.10.2
+    ports:
+      - 3306:3306
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      central-network:
+        aliases:
+          - main-db
+    environment:
+      - MARIADB_ROOT_PASSWORD=ignition
+      - MARIADB_DATABASE=ignition
+      - MARIADB_USER=ignition
+      - MARIADB_PASSWORD=ignition
+
+networks:
+  edge-network:
+  central-network:
+volumes:
+  edge-data:
+  central-data:
+  db-data:
