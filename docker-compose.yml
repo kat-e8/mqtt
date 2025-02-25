@@ -1,6 +1,9 @@
 services:
   edge:
-    image: inductiveautomation/ignition:8.1.45
+    build:
+      context: gw-build/edge
+      args:
+        IGNITION_VERSION: 8.1.45
     hostname: edge
     ports:
       - 9088:8088
