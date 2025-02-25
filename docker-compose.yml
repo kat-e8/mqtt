@@ -23,7 +23,10 @@ services:
       -m 2048
       -r /restore.gwbk
   central:
-    image: inductiveautomation/ignition:8.1.45
+    build:
+      context: gw-build/central
+      args:
+        IGNITION_VERSION: 8.1.45
     hostname: central
     ports:
       - 9090:8088
